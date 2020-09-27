@@ -17,7 +17,7 @@ function initializePrompt() {
       <title>Team Profile</title>
   </head>
   <body>
-      <nav class="navbar navbar-dark bg-dark mb-5">
+      <nav class="navbar navbar-dark bg-danger mb-5" style="height: 90px">
           <span class="navbar-brand mb-0 h1 w-100 text-center">Team Profile</span>
       </nav>
       <div class="container">
@@ -57,10 +57,12 @@ function addTeamMember() {
       let memberRole = "";
       if (role === "Engineer") {
         memberRole = "Github";
-      } else if ((role = "Manager")) {
+      } else if (role === "Manager") {
         memberRole = "Office Phone Number";
-      } else {
+      } else if (role === "Intern") {
         memberRole = "School Name";
+      } else {
+        console.log("Please select team member's Role");
       }
       inquirer
         .prompt([
@@ -81,11 +83,19 @@ function addTeamMember() {
             newMember = new Engineer(name, id, email, memberRole);
           } else if (role === "Manager") {
             newMember = new Manager(name, id, email, memberRole);
-          } else {
+          } else if (role === "Intern") {
             newMember = new Intern(name, id, email, memberRole);
+          } else {
+            console.log("Error");
           }
           employees.push(newMember);
-          addMemberHTML(newMember);
+          addMemberHTML(newMember).then(function() {
+            if (addMoreMember === "Yes") {
+              addTeamMember();
+            } else {
+              finishedAPP();
+            }
+          });
         });
     });
 }
@@ -97,44 +107,21 @@ function addMemberHTML(member) {
     const id = member.getId();
     const email = member.getEmail();
     let data = "";
+
     if (role === "Engineer") {
       const gitHub = member.getGithub();
-      data = `<div class="col-6">
-        <div class="card mx-auto mb-3" style="width: 18rem">
-        <h5 class="card-header">${name}<br /><br />Engineer</h5>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${id}</li>
-            <li class="list-group-item">Email Address: ${email}</li>
-            <li class="list-group-item">GitHub: ${gitHub}</li>
-        </ul>
-        </div>
-    </div>`;
+      const list = "Github";
+      data = addHTML(name, id, email, gitHub, list, role);
     } else if (role === "Intern") {
       const school = member.getSchool();
-      data = `<div class="col-6">
-        <div class="card mx-auto mb-3" style="width: 18rem">
-        <h5 class="card-header">${name}<br /><br />Intern</h5>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${id}</li>
-            <li class="list-group-item">Email Address: ${email}</li>
-            <li class="list-group-item">School: ${school}</li>
-        </ul>
-        </div>
-    </div>`;
+      const list = "school";
+      data = addHTML(name, id, email, school, list, role);
     } else {
       const officePhone = member.getOfficeNumber();
-      data = `<div class="col-6">
-        <div class="card mx-auto mb-3" style="width: 18rem">
-        <h5 class="card-header">${name}<br /><br />Manager</h5>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${id}</li>
-            <li class="list-group-item">Email Address: ${email}</li>
-            <li class="list-group-item">Office Phone: ${officePhone}</li>
-        </ul>
-        </div>
-    </div>`;
+      const list = "Office Number";
+      data = addHTML(name, id, email, officePhone, list, role);
     }
-    console.log("adding team member");
+
     fs.appendFile("./output/team.html", data, function(err) {
       if (err) {
         return reject(err);
@@ -142,6 +129,61 @@ function addMemberHTML(member) {
       return resolve();
     });
   });
+}
+
+function addHTML(name, id, email, roleDetail, list, role) {
+  if (role === "Engineer") {
+    let data = `<div class="col-6">
+      <div class="card mx-auto mb-5" style="width: 18rem">
+      <h5 class="card-header bg-primary text-white">
+        ${name}
+        <br />
+        <br />
+        ${role}
+      </h5>
+      <ul class="list-group list-group-flush" id="list-group">
+          <li class="list-group-item">ID: ${id}</li>
+          <li class="list-group-item">Email Address: <a href = "mailto:${email}" target="_blank">${email}</a>
+          </li>
+          <li class="list-group-item">${list}: <a href="https://github.com/${roleDetail}" target="_blank">${roleDetail}</a></li>
+      </ul>
+      </div>
+      </div>`;
+    return data;
+  } else {
+    let data = `<div class="col-6">
+      <div class="card mx-auto mb-5" style="width: 18rem">
+      <h5 class="card-header bg-primary text-white">
+        ${name}
+        <br />
+        <br />
+        ${role}
+      </h5>
+      <ul class="list-group list-group-flush" id="list-group">
+          <li class="list-group-item">ID: ${id}</li>
+          <li class="list-group-item">Email Address: <a href="mailto:${email}" target="_blank">${email}</a>
+          </li>
+          <li class="list-group-item">${list}: ${roleDetail}</li>
+      </ul>
+      </div>
+      </div>`;
+    return data;
+  }
+}
+
+function finishedAPP() {
+  const html = ` </div>
+  </div>
+  
+  </body>
+  </html>`;
+
+  fs.appendFile("./output/team.html", html, function(err) {
+    if (err) {
+      console.log(err);
+    }
+  });
+  console.log("Exit the application, and the HTML is generated");
 }
 
 initializePrompt();
