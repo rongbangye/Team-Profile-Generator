@@ -4,8 +4,6 @@ const Engineer = require("./lib/Engineer");
 const Manager = require("./lib/Manager");
 const Intern = require("./lib/Intern");
 
-const employees = [];
-
 function initializePrompt() {
   const html = `<!DOCTYPE html>
   <html lang="en">
@@ -42,15 +40,39 @@ function addTeamMember() {
       },
       {
         message: "Enter team member's name: ",
-        name: "name"
+        name: "name",
+        validate: nameInput => {
+          if (nameInput) {
+            return true;
+          } else {
+            console.log("Please enter your name!");
+            return false;
+          }
+        }
       },
       {
         message: "Enter team member's ID: ",
-        name: "id"
+        name: "id",
+        validate: idInput => {
+          if (idInput) {
+            return true;
+          } else {
+            console.log("Please enter your ID!");
+            return false;
+          }
+        }
       },
       {
         message: "Enter team member's email address: ",
-        name: "email"
+        name: "email",
+        validate: emailInput => {
+          if (emailInput) {
+            return true;
+          } else {
+            console.log("Please enter your Email!");
+            return false;
+          }
+        }
       }
     ])
     .then(function({ role, name, id, email }) {
@@ -88,7 +110,6 @@ function addTeamMember() {
           } else {
             console.log("Error");
           }
-          employees.push(newMember);
           addMemberHTML(newMember).then(function() {
             if (addMoreMember === "Yes") {
               addTeamMember();
